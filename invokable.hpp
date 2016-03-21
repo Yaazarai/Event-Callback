@@ -3,6 +3,7 @@
     #include <functional>
     #include <type_traits>
     #include <vector>
+    #include <algorithm>
 
     #pragma region Placeholder Generator
 
@@ -35,8 +36,8 @@
     public:
         std::function<void(A...)> func;
 
-        inline bool operator == (const callback& objX) {
-            return (hash == objX.hash);
+        inline bool operator == (const callback& cb) {
+            return (hash == cb.hash);
         };
 
         template<typename T, class _Fx, int... Is>
@@ -46,7 +47,7 @@
             hash = (size_t)&func ^ (&typeid(callback<A...>))->hash_code();
         };
 
-        size_t hash_code() {
+        size_t hash_code() const {
             return hash;
         };
     };
@@ -61,12 +62,16 @@
         std::vector<callback<A...>> callbacks;
 
     public:
-        inline void operator -= (const callback<A...>& objX) {
-            unhook(objX);
+        inline void operator += (const callback<A...>& cb) {
+            if (find(callbacks.begin(), callbacks.end(), cb) == callbacks.end())
+                callbacks.push_back(cb);
         };
-
-        inline void operator += (const callback<A...>& objX) {
-            callbacks.push_back(objX);
+        
+        inline void operator -= (const callback<A...>& cb) {
+            std::vector<callback<A...>>::iterator it;
+            it = std::find(callbacks.begin(), callbacks.end(), cb);
+            if (it != callbacks.end())
+                callbacks.erase(it);
         };
 
         inline void operator () (A... args) {
@@ -80,16 +85,11 @@
         };
 
         void hook(callback<A...> cb) {
-            callbacks.push_back(cb);
+            (*this) += cb;
         };
 
         void unhook(callback<A...> cb) {
-            for (size_t i = 0; i < callbacks.size(); i++) {
-                if (cb == callbacks.at(i)) {
-                    callbacks.erase(callbacks.begin() + i);
-                    break;
-                }
-            }
+            (*this) -= cb;
         };
 
         template<typename... Ar>
