@@ -1,6 +1,8 @@
 # CPP-Event-Callback
 Similar C# style event system for C++.
 
+Sources: [Function\<T\>](http://stackoverflow.com/a/9568485) and [Placeholder Generator](http://stackoverflow.com/a/21664270/4988255)
+
 ####Example Usage of Invokable / Callback
 
 Creating an invokable event with input parameters:
