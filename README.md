@@ -1,7 +1,7 @@
-# CPP-Event-Callback
-Similar C# style event system for C++.
+# C++ Event Callback
+Library that mimics the C# style event handling system via subscribing(***hooking***) / unsubscribing(***unhooking***) member functions to events. Create a callback, subscribe that callback to an event, invoke the event, unscribe the callback when it's not longer needed.
 
-Sources: [Function\<T\>](http://stackoverflow.com/a/9568485) and [Placeholder Generator](http://stackoverflow.com/a/21664270/4988255)
+Sources: [Function\<T\>](http://stackoverflow.com/a/9568485) and [Placeholder Generator](http://stackoverflow.com/a/21664270/4988255).
 
 ####Example Usage of Invokable / Callback
 
