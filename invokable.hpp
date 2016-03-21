@@ -79,11 +79,8 @@
             return cb;
         };
 
-        template<typename T, class _Fx>
-        callback<A...> hook(T* obj, _Fx&& func) {
-            callback<A...> cb(obj, func, make_int_sequence<sizeof...(A)>{});
+        void hook(callback<A...> cb) {
             callbacks.push_back(cb);
-            return cb;
         };
 
         void unhook(callback<A...> cb) {
