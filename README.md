@@ -3,7 +3,7 @@ Library that mimics the C# style event handling system via subscribing(***hookin
 
 Sources: [Function\<T\>](http://stackoverflow.com/a/9568485) and [Placeholder Generator](http://stackoverflow.com/a/21664270/4988255).
 
-####Example Usage of Invokable / Callback
+####Reference Invokable / Callback
 
 Creating an invokable event with input parameters:
 ```
@@ -17,7 +17,7 @@ Explicit callback creation:
 ```
 class myclass {
 public:
-    void F(int x, int y) {};
+    void F(int x, int y) {...};
 };
 
 myclass inst;
@@ -40,4 +40,55 @@ Invoking an event--notifies subscribed callbacks:
 event(10, 10);
 // OR
 event.invoke(10, 10);
+```
+
+
+####Example
+```
+#include <iostream>
+#include "invokable.hpp"
+
+class myclass {
+private:
+    int id = 0;
+public:
+    myclass(int id) {
+       this->id = id;
+    };
+    
+    void function(int x) {
+        cout << (id * x) << endl;
+    };
+};
+
+class someclass {
+public:
+    void func(int x) {
+        cout << x << endl;
+    };
+};
+
+int main() {
+    invokable<int> event;
+    myclass x(3), y(1);
+    someclass z;
+    callable<int> callx = event.create(&x, &myclass::function);
+    callable<int> cally = event.create(&y, &myclass::function);
+    callable<int> callz = event.create(&z, &someclass::func);
+    
+    event += callx;
+    event += cally;
+    event += callz;
+    event(12);
+    event -= callx;
+    event -= cally;
+    event -= callz;
+};
+
+/*
+    Output:
+        24
+        12
+        2
+*/
 ```
