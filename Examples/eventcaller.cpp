@@ -24,7 +24,7 @@ int main() {
     
     callback<> call = caller.button_press.create(&listener, &EventListener::notifier);
     caller += call;
-    caller();
+    caller.button_press();
     caller -= call;
 };
 
