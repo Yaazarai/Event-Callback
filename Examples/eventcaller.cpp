@@ -27,3 +27,8 @@ int main() {
     caller();
     caller -= call;
 };
+
+/*
+    Output:
+        Button Pressed
+*/
