@@ -25,9 +25,9 @@ int main() {
     invokable<int> event;
     myclass x(2), y(1);
     someclass z;
-    callback<int> callx = event.create(&x, &myclass::function);
-    callback<int> cally = event.create(&y, &myclass::function);
-    callback<int> callz = event.create(&z, &someclass::func);
+    callback<int> callx(&x, &myclass::function);
+    callback<int> cally(&y, &myclass::function);
+    callback<int> callz(&z, &someclass::func);
     
     event += callx;
     event += cally;
