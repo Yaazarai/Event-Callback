@@ -22,7 +22,7 @@
 
     namespace std {
         template<int N>
-        struct is_placeholder< placeholder_template<N> > : integral_constant<int, N + 1> {};
+        struct is_placeholder<placeholder_template<N>> : integral_constant<int, N + 1> {};
     };
 
     #pragma endregion
@@ -33,18 +33,46 @@
     class callback {
     private:
         size_t hash = 0;
-    public:
         std::function<void(A...)> func;
 
+        template<typename T, class _Fx, int... Is>
+        void create(T* obj, _Fx&& func, int_sequence<Is...>) {
+            hash = (size_t)&this->func ^ (&typeid(callback<A...>))->hash_code();
+            this->func = std::function<void(A...)>(std::bind(func, obj, placeholder_template<Is>{}...));
+        };
+
+        template<class _Fx, int... Is>
+        void create(_Fx&& func, int_sequence<Is...>) {
+            this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>{}...));
+            hash = (size_t)&this->func ^ (&typeid(callback<A...>))->hash_code();
+        };
+
+    public:
         inline bool operator == (const callback& cb) {
             return (hash == cb.hash);
         };
 
-        template<typename T, class _Fx, int... Is>
-        callback(T* obj, _Fx&& func, int_sequence<Is...>) {
-            function<void(A...)> fn = bind(func, obj, placeholder_template<Is>{}...);
-            hash = (size_t)&func ^ (&typeid(callback<A...>))->hash_code();
-            this->func = fn;
+        inline bool operator != (const callback& cb) {
+            return (hash != cb.hash);
+        };
+
+        inline callback& operator () (A... args) {
+            func(args...);
+            return (*this);
+        };
+
+        template<typename T, class _Fx>
+        callback(T* obj, _Fx&& func) {
+            create(obj, func, make_int_sequence<sizeof...(A)> {});
+        };
+
+        template<class _Fx>
+        callback(_Fx&& func) {
+            create(func, make_int_sequence<sizeof...(A)> {});
+        };
+
+        void invoke(A... args) {
+            func(args...);
         };
 
         size_t hash_code() const {
@@ -62,26 +90,30 @@
         std::vector<callback<A...>> callbacks;
 
     public:
-        inline void operator += (const callback<A...>& cb) {
-            if (find(callbacks.begin(), callbacks.end(), cb) == callbacks.end())
+        inline invokable& operator += (const callback<A...>& cb) {
+            if (std::find(callbacks.begin(), callbacks.end(), cb) == callbacks.end())
                 callbacks.push_back(cb);
+            return (*this);
         };
-        
-        inline void operator -= (const callback<A...>& cb) {
+
+        inline invokable& operator -= (const callback<A...>& cb) {
             std::vector<callback<A...>>::iterator it;
             it = std::find(callbacks.begin(), callbacks.end(), cb);
+            
             if (it != callbacks.end())
                 callbacks.erase(it);
+            return (*this);
         };
 
-        inline void operator () (A... args) {
+        inline invokable& operator = (const callback<A...>& cb) {
+            callbacks.clear();
+            (*this) += cb;
+            return (*this);
+        };
+
+        inline invokable& operator () (A... args) {
             invoke(args...);
-        };
-
-        template<typename T, class _Fx>
-        callback<A...> create(T* obj, _Fx&& func) {
-            callback<A...> cb(obj, func, make_int_sequence<sizeof...(A)>{});
-            return cb;
+            return (*this);
         };
 
         void hook(callback<A...> cb) {
@@ -92,12 +124,9 @@
             (*this) -= cb;
         };
 
-        template<typename... Ar>
-        void invoke(Ar... args) {
-            for (size_t i = 0; i < callbacks.size(); i++) {
-                callback<A...> cb = callbacks[i];
-                cb.func(args...);
-            }
+        void invoke(A... args) {
+            for (size_t i = 0; i < callbacks.size(); i++)
+                callbacks[i](args...);
         };
     };
 
