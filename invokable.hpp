@@ -124,6 +124,14 @@
             (*this) -= cb;
         };
 
+        void hook_unhook(callback<A...> cb) {
+            (*this) = cb;
+        };
+
+        void unhook_all() {
+            callbacks.clear();
+        };
+
         void invoke(A... args) {
             for (size_t i = 0; i < callbacks.size(); i++)
                 callbacks[i](args...);
