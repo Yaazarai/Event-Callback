@@ -43,8 +43,8 @@
         template<typename T, class _Fx, int... Is>
         callback(T* obj, _Fx&& func, int_sequence<Is...>) {
             function<void(A...)> fn = bind(func, obj, placeholder_template<Is>{}...);
-            this->func = fn;
             hash = (size_t)&func ^ (&typeid(callback<A...>))->hash_code();
+            this->func = fn;
         };
 
         size_t hash_code() const {
