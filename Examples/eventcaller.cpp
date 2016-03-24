@@ -14,7 +14,7 @@ public:
 class EventListener {
 public:
     void notifier() {
-        cout << "Button Pressed" << endl;
+        std::cout << "Button Pressed" << std::endl;
     };
 };
 
@@ -23,9 +23,9 @@ int main() {
     EventListener listener;
     
     callback<> call = caller.button_press.create(&listener, &EventListener::notifier);
-    caller += call;
+    caller.button_press += call;
     caller.button_press();
-    caller -= call;
+    caller.button_press -= call;
 };
 
 /*
