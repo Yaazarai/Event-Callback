@@ -17,13 +17,13 @@ public:
 class someclass {
 public:
     void func(int x) {
-        std::cout << x << std::endl;
+        std::cout << (x / 6) << std::endl;
     };
 };
 
 int main() {
     invokable<int> event;
-    myclass x(3), y(1);
+    myclass x(2), y(1);
     someclass z;
     callback<int> callx = event.create(&x, &myclass::function);
     callback<int> cally = event.create(&y, &myclass::function);
