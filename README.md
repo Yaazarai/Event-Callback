@@ -13,7 +13,7 @@ invokable<int, int> event;
 // Without parameters
 invokable<> event;
 ```
-Explicit callback creation:
+Callback creation:
 ```
 class myclass {
 public:
@@ -21,7 +21,7 @@ public:
 };
 
 myclass inst;
-callback<int, int> call = event.create(&inst, &myclass::G);
+callback<int, int> call(&inst, &myclass::G);
 ```
 Hooking and unhooking a callback to/from an event:
 ```
@@ -34,10 +34,34 @@ event.hook(call);
 event -= call;
 // OR
 event.unhook(call);
+
+// Hook Event & Unhook All Other Hooked events
+event = call;
+// OR
+event.hook_unhook(call);
 ```
+Unhooking all hooked events:
+```
+event.unhook_all();
+```
+
 Invoking an event--notifies subscribed callbacks:
 ```
 event(10, 10);
 // OR
 event.invoke(10, 10);
+```
+Lambda & Static Class Methods:
+```
+class myclass {
+public:
+    static void function() {
+       cout << "Static Call" << endl;
+    }
+};
+
+invokable<> event;
+callback<> static_call(&myclass::function);
+callback<> lambda_call([](){cout << "Lambda Call" << endl;});
+...
 ```
