@@ -54,7 +54,7 @@
 
     #pragma endregion
 
-    #pragma region Invokable event
+    #pragma region Invokable Event
 
     template<typename... A>
     class invokable {
