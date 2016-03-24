@@ -22,7 +22,7 @@ int main() {
     EventCaller caller;
     EventListener listener;
     
-    callback<> call = caller.button_press.create(&listener, &EventListener::notifier);
+    callback<> call(&listener, &EventListener::notifier);
     caller.button_press += call;
     caller.button_press();
     caller.button_press -= call;
