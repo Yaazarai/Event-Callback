@@ -1,4 +1,3 @@
-```
 #include <iostream>
 #include "invokable.hpp"
 
@@ -11,14 +10,14 @@ public:
     };
     
     void function(int x) {
-        cout << (id * x) << endl;
+        std::cout << (id * x) << std::endl;
     };
 };
 
 class someclass {
 public:
     void func(int x) {
-        cout << x << endl;
+        std::cout << x << std::endl;
     };
 };
 
@@ -45,4 +44,3 @@ int main() {
         12
         2
 */
-```
