@@ -97,7 +97,7 @@
         };
 
         const inline invokable& operator -= (const callback<A...>& cb) {
-            std::vector<callback<A...>>::iterator it;
+            typename std::vector<callback<A...>>::iterator it;
             it = std::find(callbacks.begin(), callbacks.end(), cb);
 
             if (it != callbacks.end())
