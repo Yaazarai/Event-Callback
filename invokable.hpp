@@ -7,16 +7,6 @@
 
     #pragma region Placeholder Generator
 
-    /// by "dyp" at http://stackoverflow.com/a/21664270
-    template<int...>
-    struct int_sequence {};
-
-    template<int N, int... Is>
-    struct make_int_sequence : make_int_sequence<N - 1, N - 1, Is...> {};
-
-    template<int... Is>
-    struct make_int_sequence<0, Is...> : int_sequence<Is...> {};
-
     template<int>
     struct placeholder_template {};
 
@@ -35,14 +25,14 @@
         size_t hash;
         std::function<void(A...)> func;
 
-        template<typename T, class _Fx, int... Is>
-        void create(T* obj, _Fx&& func, int_sequence<Is...>) {
-            this->func = std::function<void(A...)>(std::bind(func, obj, placeholder_template<Is>{}...));
+        template<typename T, class _Fx, std::size_t... Is>
+        void create(T* obj, _Fx&& func, std::integer_sequence<std::size_t, Is...>) {
+            this->func = std::function<void(A...)>(std::bind(func, obj, placeholder_template<Is>()...));
         };
 
-        template<class _Fx, int... Is>
-        void create(_Fx&& func, int_sequence<Is...>) {
-            this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>{}...));
+        template<class _Fx, std::size_t... Is>
+        void create(_Fx&& func, std::index_sequence<Is...>) {
+            this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>()...));
         };
 
     public:
@@ -62,13 +52,13 @@
         template<typename T, class _Fx>
         callback(T* obj, _Fx&& func) {
             hash = reinterpret_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
-            create(obj, func, make_int_sequence<sizeof...(A)> {});
+            create(obj, func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
         };
 
         template<class _Fx>
         callback(_Fx&& func) {
             hash = reinterpret_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
-            create(func, make_int_sequence<sizeof...(A)> {});
+            create(func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
         };
 
         void invoke(A... args) {
