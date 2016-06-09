@@ -31,7 +31,7 @@
         };
 
         template<class _Fx, std::size_t... Is>
-        void create(_Fx&& func, std::index_sequence<Is...>) {
+        void create(_Fx&& func, std::integer_sequence<std::size_t, Is...>) {
             this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>()...));
         };
 
