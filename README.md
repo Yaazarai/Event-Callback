@@ -6,7 +6,7 @@ Sources: [Function\<T\>](http://stackoverflow.com/a/9568485) and [Placeholder Ge
 ####Reference Invokable / Callback
 
 Creating an invokable event with input parameters:
-```
+```C++
 // With parameters (int, int)
 invokable<int, int> event;
 
@@ -14,7 +14,7 @@ invokable<int, int> event;
 invokable<> event;
 ```
 Callback creation:
-```
+```C++
 class myclass {
 public:
     void F(int x, int y) {...};
@@ -24,7 +24,7 @@ myclass inst;
 callback<int, int> call(&inst, &myclass::G);
 ```
 Hooking and unhooking a callback to/from an event:
-```
+```C++
 // Hoook
 event += call;
 // OR
@@ -41,18 +41,18 @@ event = call;
 event.hook_unhook(call);
 ```
 Unhooking all hooked events:
-```
+```C++
 event.unhook_all();
 ```
 
 Invoking an event--notifies subscribed callbacks:
-```
+```C++
 event(10, 10);
 // OR
 event.invoke(10, 10);
 ```
 Lambda & Static Class Methods:
-```
+```C++
 class myclass {
 public:
     static void function() {
