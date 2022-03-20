@@ -14,31 +14,28 @@
 
         template<typename T, class _Fx, std::size_t... Is>
         void create(T* obj, _Fx&& func, std::integer_sequence<std::size_t, Is...>) {
-            this->func = std::function<void(A...)>(std::bind(func, obj, placeholder_template<Is>()...));
+            this->func = std::function<void(A...)>(std::bind(func, obj, placeholder_template<Is>...));
         };
 
         template<class _Fx, std::size_t... Is>
         void create(_Fx&& func, std::integer_sequence<std::size_t, Is...>) {
-            this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>()...));
-        };
-    public:
-        const inline bool operator == (const callback& cb) {
-            return (hash == cb.hash);
+            this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>...));
         };
 
-        const inline bool operator != (const callback& cb) {
-            return (hash != cb.hash);
-        };
+    public:
+        const inline bool operator == (const callback& cb) { return (hash == cb.hash); };
+
+        const inline bool operator != (const callback& cb) { return (hash != cb.hash); };
 
         template<typename T, class _Fx>
         callback(T* obj, _Fx&& func) {
-            hash = reinterpret_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
+            hash = static_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
             create(obj, func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
         };
 
         template<class _Fx>
         callback(_Fx&& func) {
-            hash = reinterpret_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
+            hash = static_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
             create(func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
         };
 
@@ -47,17 +44,11 @@
             return (*this);
         };
 
-        void invoke(A... args) {
-            func(args...);
-        };
+        void invoke(A... args) { func(args...); };
 
-        constexpr size_t hash_code() const throw() {
-            return hash;
-        };
+        constexpr size_t hash_code() const throw() { return hash; };
 
-        callback<A...> clone() {
-            return callback<A...>(func);
-        }
+        callback<A...> clone() { return callback<A...>(func); }
     };
 
     template<typename... A>
@@ -88,50 +79,40 @@
         };
 
         void hook(callback<A...> cb) {
-            safety_lock.lock();
+            std::lock_guard<std::mutex> g(safety_lock);
 
             if (std::find(callbacks.begin(), callbacks.end(), cb) == callbacks.end())
                 callbacks.push_back(cb);
-
-            safety_lock.unlock();
         };
 
         void unhook(callback<A...> cb) {
-            safety_lock.lock();
+            std::lock_guard<std::mutex> g(safety_lock);
 
             typename std::vector<callback<A...>>::iterator it;
             it = std::find(callbacks.begin(), callbacks.end(), cb);
 
             if (it != callbacks.end())
                 callbacks.erase(it);
-
-            safety_lock.unlock();
         };
 
         void hook_unhook(callback<A...> cb) {
-            safety_lock.lock();
+            std::lock_guard<std::mutex> g(safety_lock);
 
             callbacks.clear();
             (*this) += cb;
-
-            safety_lock.unlock();
         };
 
         void unhook_all() {
-            safety_lock.lock();
+            std::lock_guard<std::mutex> g(safety_lock);
 
             callbacks.clear();
-
-            safety_lock.unlock();
         };
 
         void invoke(A... args) {
-            safety_lock.lock();
+            std::lock_guard<std::mutex> g(safety_lock);
 
             for (size_t i = 0; i < callbacks.size(); i++)
                 callbacks[i](args...);
-
-            safety_lock.unlock();
         };
     };
 #endif
