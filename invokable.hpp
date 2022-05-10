@@ -95,10 +95,7 @@
         const inline invokable& operator -= (const callback<A...>& cb) { unhook(cb); return (*this); };
         
         /// Removes all registered callbacks and adds a new callback.
-        const inline invokable& operator = (const callback<A...>& cb) {
-            if (cb != nullptr) { hook_unhook(cb); } else { unhook_all(); }
-            return (*this);
-        };
+        const inline invokable& operator = (const callback<A...>& cb) { hook_unhook(cb); return (*this); };
         
         /// Execute all registered callbacks.
         const inline invokable& operator () (A... args) { invoke(args...); return (*this); };
