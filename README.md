@@ -43,8 +43,6 @@ event.hook_unhook(call);
 Unhooking all hooked events:
 ```C++
 event.unhook_all();
-// OR
-event = nullptr;
 ```
 
 Invoking an event--notifies subscribed callbacks:
