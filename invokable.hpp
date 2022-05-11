@@ -6,7 +6,8 @@
     #include <vector>
     #include <algorithm>
     #include <mutex>
-
+    
+    /// by "dyp" at http://stackoverflow.com/a/21664270
     /// This generates the expansion for vargs into the invokable templated types.
     #pragma region Placeholder Generator
     template<int>
