@@ -43,9 +43,6 @@ event.hook_unhook(call);
 Unhooking all hooked events:
 ```C++
 event.unhook_all();
-// OR
-event = callback<int, int>::default;
-/// Swap <int,int> to your template args.
 ```
 
 Invoking an event--notifies subscribed callbacks:
