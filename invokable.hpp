@@ -83,7 +83,7 @@
 
     public:
         /// Adds a callback to this event.
-        const inline invokable& operator += (const callback<A...>& cb) { if (cb != nullptr) hook(cb); return (*this); };
+        const inline invokable& operator += (const callback<A...>& cb) { hook(cb); return (*this); };
 
         /// Removes a callback from this event.
         const inline invokable& operator -= (const callback<A...>& cb) { unhook(cb); return (*this); };
