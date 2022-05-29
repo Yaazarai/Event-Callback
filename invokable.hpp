@@ -15,7 +15,7 @@
     namespace std {
         template<int N>
         struct is_placeholder<placeholder_template<N>> : integral_constant<int, N + 1> {};
-    };
+    }
     #pragma endregion
 
     #pragma region Invokable Callback
@@ -32,42 +32,42 @@
         template<typename T, class _Fx, std::size_t... Is>
         void create(T* obj, _Fx&& func, std::integer_sequence<std::size_t, Is...>) {
             this->func = std::function<void(A...)>(std::bind(func, obj, placeholder_template<Is>()...));
-        };
+        }
 
         // Creates and binds the function callback for a static/lambda/global function.
         template<class _Fx, std::size_t... Is>
         void create(_Fx&& func, std::integer_sequence<std::size_t, Is...>) {
             this->func = std::function<void(A...)>(std::bind(func, placeholder_template<Is>()...));
-        };
+        }
     public:
         /// Compares equality of callbacks.
-        const inline bool operator == (const callback& cb) { return (hash == cb.hash); };
+        inline bool operator == (const callback& cb) { return (hash == cb.hash); }
 
         /// Compares not-equality of callbacks.
-        const inline bool operator != (const callback& cb) { return (hash != cb.hash); };
+        inline bool operator != (const callback& cb) { return (hash != cb.hash); }
 
         /// Executes this callback with arguments.
-        const inline callback& operator () (A... args) { func(args...); return (*this); };
+        inline callback& operator () (A... args) { func(args...); return (*this); }
 
         /// Construct a callback with a template T reference for instance/member functions.
         template<typename T, class _Fx>
         callback(T* obj, _Fx&& func) {
-            hash = reinterpret_cast<size_t>(&this->func) ^ reinterpret_cast<size_t>(obj) ^ (&typeid(callback<A...>))->hash_code();
+            hash = reinterpret_cast<size_t>(&this->func) ^ reinterpret_cast<size_t>(obj);
             create(obj, func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
-        };
+        }
 
         /// Construct a callback with template _Fx for static/lambda/global functions.
         template<class _Fx>
         callback(_Fx&& func) {
-            hash = reinterpret_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
+            hash = reinterpret_cast<size_t>(&this->func);
             create(func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
-        };
+        }
 
         /// Executes this callback with arguments.
-        callback& invoke(A... args) { func(args...); return (*this); };
+        callback& invoke(A... args) { func(args...); return (*this); }
 
         /// Returns this callbacks hash code.
-        constexpr size_t hash_code() const throw() { return hash; };
+        constexpr size_t hash_code() const throw() { return hash; }
     };
     #pragma endregion
 
@@ -83,63 +83,63 @@
 
     public:
         /// Adds a callback to this event.
-        const inline invokable& operator += (const callback<A...>& cb) { hook(cb); return (*this); };
+        inline invokable<A...>& operator += (const callback<A...>& cb) { hook(cb); return (*this); }
 
         /// Removes a callback from this event.
-        const inline invokable& operator -= (const callback<A...>& cb) { unhook(cb); return (*this); };
+        inline invokable<A...>& operator -= (const callback<A...>& cb) { unhook(cb); return (*this); }
 
         /// Removes all registered callbacks and adds a new callback.
-        const inline invokable& operator = (const callback<A...>& cb) { hook_unhook(cb); return (*this); };
+        inline invokable<A...>& operator = (const callback<A...>& cb) { hook_unhook(cb); return (*this); }
 
         /// Execute all registered callbacks.
-        const inline invokable& operator () (A... args) { invoke(args...); return (*this); };
+        inline invokable<A...>& operator () (A... args) { invoke(args...); return (*this); }
 
         /// Adds a callback to this event, operator +=
-        invokable& hook(callback<A...> cb) {
+        invokable<A...>& hook(callback<A...> cb) {
             std::lock_guard<std::mutex> g(safety_lock);
 
             if (std::find(callbacks.begin(), callbacks.end(), cb) == callbacks.end())
                 callbacks.push_back(cb);
 
             return (*this);
-        };
+        }
 
         /// Removes a callback from this event, operator -=
-        invokable& unhook(callback<A...> cb) {
+        invokable<A...>& unhook(callback<A...> cb) {
             std::lock_guard<std::mutex> g(safety_lock);
 
             std::erase_if(callbacks, [cb](callback<A...> i) { return cb == i; });
 
             return (*this);
-        };
+        }
 
         /// Removes all registered callbacks and adds a new callback, operator =
-        invokable& hook_unhook(callback<A...> cb) {
+        invokable<A...>& hook_unhook(callback<A...> cb) {
             std::lock_guard<std::mutex> g(safety_lock);
 
             callbacks.clear();
             callbacks.push_back(cb);
 
             return (*this);
-        };
+        }
 
         /// Removes all registered callbacks.
-        invokable& unhook_all() {
+        invokable<A...>& unhook_all() {
             std::lock_guard<std::mutex> g(safety_lock);
 
             callbacks.clear();
 
             return (*this);
-        };
+        }
 
         /// Execute all registered callbacks, operator ()
-        invokable& invoke(A... args) {
+        invokable<A...>& invoke(A... args) {
             std::lock_guard<std::mutex> g(safety_lock);
 
             for (callback<A...>& cb : callbacks) cb.invoke(args...);
-            
+
             return (*this);
-        };
+        }
     };
     #pragma endregion
 #endif
