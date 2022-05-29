@@ -52,14 +52,14 @@
         /// Construct a callback with a template T reference for instance/member functions.
         template<typename T, class _Fx>
         callback(T* obj, _Fx&& func) {
-            hash = reinterpret_cast<size_t>(&this->func) ^ reinterpret_cast<size_t>(obj);
+            hash = reinterpret_cast<size_t>(&this->func) ^ reinterpret_cast<size_t>(obj) ^ (&typeid(callback<A...>))->hash_code();
             create(obj, func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
         }
 
         /// Construct a callback with template _Fx for static/lambda/global functions.
         template<class _Fx>
         callback(_Fx&& func) {
-            hash = reinterpret_cast<size_t>(&this->func);
+            hash = reinterpret_cast<size_t>(&this->func) ^ (&typeid(callback<A...>))->hash_code();
             create(func, std::make_integer_sequence<std::size_t, sizeof...(A)> {});
         }
 
