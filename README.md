@@ -68,3 +68,7 @@ callback<> lambda_call([](){cout << "Lambda Call" << endl;});
 event += static_call;
 event += lambda_call;
 ```
+Finally the function calls can be method-chained, example:
+```
+event.hook(static_call).hook(lambda_call);
+```
