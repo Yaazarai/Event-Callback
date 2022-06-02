@@ -17,7 +17,6 @@
         struct is_placeholder<placeholder_template<N>> : integral_constant<int, N + 1> {};
     }
     #pragma endregion
-
     #pragma region Invokable Callback
     /// Function binder for dynamic callbacks.
     template<typename... A>
@@ -42,10 +41,8 @@
     public:
         /// Compares equality of callbacks.
         inline bool operator == (const callback& cb) { return (hash == cb.hash); }
-
         /// Compares not-equality of callbacks.
         inline bool operator != (const callback& cb) { return (hash != cb.hash); }
-
         /// Executes this callback with arguments.
         inline callback& operator () (A... args) { func(args...); return (*this); }
 
@@ -70,7 +67,6 @@
         constexpr size_t hash_code() const throw() { return hash; }
     };
     #pragma endregion
-
     #pragma region Invokable Event
     /// Thread-safe event handler for callbacks.
     template<typename... A>
@@ -80,17 +76,14 @@
         std::mutex safety_lock;
         /// Vector list of function callbacks associated with this invokable event.
         std::vector<callback<A...>> callbacks;
-
+        
     public:
         /// Adds a callback to this event.
         inline invokable<A...>& operator += (const callback<A...>& cb) { hook(cb); return (*this); }
-
         /// Removes a callback from this event.
         inline invokable<A...>& operator -= (const callback<A...>& cb) { unhook(cb); return (*this); }
-
         /// Removes all registered callbacks and adds a new callback.
         inline invokable<A...>& operator = (const callback<A...>& cb) { hook_unhook(cb); return (*this); }
-
         /// Execute all registered callbacks.
         inline invokable<A...>& operator () (A... args) { invoke(args...); return (*this); }
 
@@ -107,37 +100,29 @@
         /// Removes a callback from this event, operator -=
         invokable<A...>& unhook(callback<A...> cb) {
             std::lock_guard<std::mutex> g(safety_lock);
-
             std::erase_if(callbacks, [cb](callback<A...> i) { return cb == i; });
-
             return (*this);
         }
 
         /// Removes all registered callbacks and adds a new callback, operator =
         invokable<A...>& hook_unhook(callback<A...> cb) {
             std::lock_guard<std::mutex> g(safety_lock);
-
             callbacks.clear();
             callbacks.push_back(cb);
-
             return (*this);
         }
 
         /// Removes all registered callbacks.
         invokable<A...>& unhook_all() {
             std::lock_guard<std::mutex> g(safety_lock);
-
             callbacks.clear();
-
             return (*this);
         }
 
         /// Execute all registered callbacks, operator ()
         invokable<A...>& invoke(A... args) {
             std::lock_guard<std::mutex> g(safety_lock);
-
             for (callback<A...>& cb : callbacks) cb.invoke(args...);
-
             return (*this);
         }
     };
