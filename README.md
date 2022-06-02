@@ -14,6 +14,8 @@ invokable<int, int> event;
 invokable<> event;
 ```
 Callback creation:
+
+- ***Quick Clarification: The template arguments are the function parameters of the function you want to create a callback for. The actual arguments to the callback constructor are the references to the function and instance the function is attached to itself. This could be somewhat confusing if you usually correlate template parameters with the leading constructor parameters for other projects.***
 ```C++
 class myclass {
 public:
