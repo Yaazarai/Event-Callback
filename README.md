@@ -41,6 +41,14 @@ event.unhook(call);
 event = call;
 // OR
 event.hook_unhook(call);
+
+// Clone invokable A events into invokable B (replacing all events in B).
+invokable<int, int> eventA;
+eventA += call1;
+eventA += call2;
+eventA += call3;
+eventB.clone(eventA);
+// Now eventB has all of eventA's event calls.
 ```
 Unhooking all hooked events:
 ```C++
