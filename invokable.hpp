@@ -9,9 +9,9 @@
 
     /// This generates the expansion for vargs into the invokable templated types.
     #pragma region Placeholder Generator
+    /* https://stackoverflow.com/questions/21663012/binding-a-generic-member-function/21664270#21664270 */
     template<int>
     struct placeholder_template {};
-
     namespace std {
         template<int N>
         struct is_placeholder<placeholder_template<N>> : integral_constant<int, N + 1> {};
@@ -71,12 +71,11 @@
     /// Thread-safe event handler for callbacks.
     template<typename... A>
     class invokable {
-    private:
+    protected:
         /// Shared resource to manage multi-thread resource locking.
         std::mutex safety_lock;
         /// Vector list of function callbacks associated with this invokable event.
         std::vector<callback<A...>> callbacks;
-        
     public:
         /// Adds a callback to this event.
         inline invokable<A...>& operator += (const callback<A...>& cb) { hook(cb); return (*this); }
@@ -123,6 +122,12 @@
         invokable<A...>& invoke(A... args) {
             std::lock_guard<std::mutex> g(safety_lock);
             for (callback<A...>& cb : callbacks) cb.invoke(args...);
+            return (*this);
+        }
+
+        /// Copies all of the callbacks from the passed invokable object into this invokable object.
+        invokable<A...>& clone(const invokable<A...>& invk) {
+            callbacks.assign(invk.callbacks.begin(), invk.callbacks.end());
             return (*this);
         }
     };
