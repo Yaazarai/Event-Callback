@@ -40,7 +40,7 @@ event.unhook(call);
 // Hook Event & Unhook All Other Hooked events
 event = call;
 // OR
-event.hook_unhook(call);
+event.rehook(call);
 
 // Clone invokable A events into invokable B (replacing all events in B).
 invokable<int, int> eventA;
@@ -52,7 +52,7 @@ eventB.clone(eventA);
 ```
 Unhooking all hooked events:
 ```C++
-event.unhook_all();
+event.empty();
 ```
 
 Invoking an event--notifies subscribed callbacks:
