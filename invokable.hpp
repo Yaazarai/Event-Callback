@@ -84,7 +84,7 @@
         /// Execute all registered callbacks.
         inline invokable<A...>& operator () (A... args) noexcept { return invoke(args...); }
         // Copies all of the callbacks from the passed invokable object into this invokable object.
-        inline invokable<A...>& operator=(invokable<A...>&& other) noexcept { return clone(other); }
+        inline invokable<A...>& operator = (invokable<A...>&& other) noexcept { return clone(other); }
 
         /// Adds a callback to this event, operator +=
         invokable<A...>& hook(const callback<A...> cb) {
