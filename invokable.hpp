@@ -1,15 +1,17 @@
+/// Source: https://stackoverflow.com/questions/9568150/what-is-a-c-delegate/9568485#9568485
+/// Source: https://stackoverflow.com/questions/21663012/binding-a-generic-member-function/21664270#21664270
 #pragma once
 #ifndef INVOKABLE_CALLBACKS
 #define INVOKABLE_CALLBACKS
     #include <functional>
     #include <vector>
     #include <mutex>
-
-    /// This generates the expansion for vargs into the invokable templated types.
+    
     #pragma region Placeholder Generator
-    /* https://stackoverflow.com/questions/21663012/binding-a-generic-member-function/21664270#21664270 */
+    /// This generates the expansion for vargs into the invokable templated types.
     template<int>
     struct placeholder_template {};
+
     namespace std {
         template<int N>
         struct is_placeholder<placeholder_template<N>> : integral_constant<int, N + 1> {};
@@ -19,7 +21,7 @@
     /// Function binder for dynamic callbacks.
     template<typename... A>
     class callback {
-    private:
+    protected:
         // Unique hash ID for class comparisons.
         size_t hash;
         // The function this callback represents.
@@ -84,7 +86,7 @@
         /// Execute all registered callbacks.
         inline invokable<A...>& operator () (A... args) noexcept { return invoke(args...); }
         // Copies all of the callbacks from the passed invokable object into this invokable object.
-        inline invokable<A...>& operator = (invokable<A...>&& other) noexcept { return clone(other); }
+        inline invokable<A...>& operator = (const invokable<A...>&& other) noexcept { return clone(other); }
 
         /// Adds a callback to this event, operator +=
         invokable<A...>& hook(const callback<A...> cb) {
@@ -119,15 +121,13 @@
         /// Execute all registered callbacks, operator ()
         invokable<A...>& invoke(A... args) {
             std::lock_guard<std::mutex> g(safety_lock);
-            for (callback<A...>& cb : callbacks)
-                cb.invoke(args...);
+            for (callback<A...>& cb : callbacks) cb.invoke(args...);
             return (*this);
         }
 
         /// Copies all of the callbacks from the passed invokable object into this invokable object.
         invokable<A...>& clone(const invokable<A...>& invk) {
-            if (this != invk)
-                callbacks.assign(invk.callbacks.begin(), invk.callbacks.end());
+            if (this != &invk) callbacks.assign(invk.callbacks.begin(), invk.callbacks.end());
             return (*this);
         }
     };
