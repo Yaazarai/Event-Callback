@@ -69,7 +69,7 @@
         constexpr size_t hash_code() const throw() { return hash; }
 
         /// Clones this callback function.
-        callback<A...> clone(const callback<A...>& cb) {
+        callback<A...>& clone(const callback<A...>& cb) {
             func = cb.func;
             hash = cb.hash;
             return (*this);
