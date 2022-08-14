@@ -45,6 +45,8 @@
         inline bool operator != (const callback<A...>& cb) noexcept { return (hash != cb.hash); }
         /// Executes this callback with templated arguments.
         inline callback<A...>& operator () (A... args) noexcept { func(args...); return (*this); }
+        /// Copy constructor.
+        inline callback<A...>& operator = (const callback<A...>& cb) { return clone(cb); }
 
         /// Construct a callback with a template T reference for instance/member functions.
         template<typename T, class _Fx>
@@ -65,6 +67,13 @@
 
         /// Returns this callbacks hash code.
         constexpr size_t hash_code() const throw() { return hash; }
+
+        /// Clones this callback function.
+        callback<A...> clone(const callback<A...>& cb) {
+            func = cb.func;
+            hash = cb.hash;
+            return (*this);
+        }
     };
     #pragma endregion
     #pragma region Invokable Event
