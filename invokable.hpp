@@ -14,7 +14,7 @@
 
     namespace std {
         template<int N>
-        struct is_placeholder<placeholder_template<N>> : integral_constant<int, N + 1> {};
+        struct std::is_placeholder<placeholder_template<N>> : std::integral_constant<int, N + 1> {};
     }
     #pragma endregion
     #pragma region Invokable Callback
