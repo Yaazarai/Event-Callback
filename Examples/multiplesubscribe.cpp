@@ -22,20 +22,20 @@ public:
 };
 
 int main() {
-    invokable<int> event;
+    invokable<int> myevent;
     myclass x(2), y(1);
     someclass z;
     callback<int> callx(&x, &myclass::function);
     callback<int> cally(&y, &myclass::function);
     callback<int> callz(&z, &someclass::func);
     
-    event += callx;
-    event += cally;
-    event += callz;
-    event(12);
-    event -= callx;
-    event -= cally;
-    event -= callz;
+    myevent += callx;
+    myevent += cally;
+    myevent += callz;
+    myevent(12);
+    myevent -= callx;
+    myevent -= cally;
+    myevent -= callz;
 };
 
 /*
