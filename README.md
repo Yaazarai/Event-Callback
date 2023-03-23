@@ -23,32 +23,24 @@ public:
 };
 
 myclass inst;
-callback<int, int> call(&inst, &myclass::G);
+callback<int, int> call(&inst, &myclass::F);
 ```
 Hooking and unhooking a callback to/from an event:
 ```C++
 // Hoook
-event += call;
-// OR
 event.hook(call);
 
 // Unhook
-event -= call;
-// OR
 event.unhook(call);
 
 // Hook Event & Unhook All Other Hooked events
-event = call;
-// OR
 event.rehook(call);
 
 // Clone invokable A events into invokable B (replacing all events in B).
 invokable<int, int> eventA;
-eventA += call1;
-eventA += call2;
-eventA += call3;
-eventB.clone(eventA);
-// Now eventB has all of eventA's event calls.
+eventA.hook(call1);
+eventA.hook(call2);
+eventA.hook(call3);
 ```
 Unhooking all hooked events:
 ```C++
@@ -57,8 +49,6 @@ event.empty();
 
 Invoking an event--notifies subscribed callbacks:
 ```C++
-event(10, 10);
-// OR
 event.invoke(10, 10);
 ```
 Lambda & Static Class Methods:
@@ -73,8 +63,8 @@ public:
 invokable<> event;
 callback<> static_call(&myclass::function);
 callback<> lambda_call([](){cout << "Lambda Call" << endl;});
-event += static_call;
-event += lambda_call;
+event.hook(static_call);
+event.hook(lambda_call);
 ```
 Finally the function calls can be method-chained, example:
 ```
