@@ -15,34 +15,39 @@
         size_t hash;
         /// The function bound to this callback.
         std::function<void(A...)> bound;
-        
+
+    public:
         /// Binds a static or lambda function.
         template<class Fx>
-        void bind_callback(Fx&& func) {
-            bound = [func](A... args) { std::invoke(func, args...); };
-            hash = reinterpret_cast<size_t>(this) ^ reinterpret_cast<size_t>(&bound) ^ (&typeid(callback<A...>))->hash_code();
+        void bind_callback(Fx func) {
+            bound = [func = std::move(func)](A... args) { std::invoke(func, args...); };
+            hash = bound.target_type().hash_code();
         }
         
         /// Binds the a class function attached to an instance of that class.
         template<typename T, class Fx>
-        void bind_callback(T* obj, Fx&& func) {
-            bound = [obj, func](A... args) { std::invoke(func, obj, args...); };
-            hash = reinterpret_cast<size_t>(this) ^ reinterpret_cast<size_t>(&bound) ^ reinterpret_cast<size_t>(obj) ^ (&typeid(callback<A...>))->hash_code();
+        void bind_callback(T* obj, Fx func) {
+            bound = [obj, func = std::move(func)](A... args) { std::invoke(func, obj, args...); };
+            hash = std::hash<T*>{}(obj) ^ bound.target_type().hash_code();
         }
-
-    public:
+        
         /// Create a callback to a static or lambda function.
         template<typename T, class Fx> callback(T* obj, Fx func) { bind_callback(obj, func); }
+        
         /// Create a callback to a class function attached to an instance of that class.
         template<class Fx> callback(Fx func) { bind_callback(func); }
+        
         /// Compares the underlying hash_code of the callback function(s).
         bool operator == (const callback<A...>& cb) { return hash == cb.hash; }
+        
         /// Inequality Compares the underlying hash_code of the callback function(s).
         bool operator != (const callback<A...>& cb) { return hash != cb.hash; }
-        /// Invoke this callback with required arguments.
-        callback<A...>& invoke(A... args) { bound(args...); return (*this); }
+        
         /// Returns the unique hash code for this callback function.
         constexpr size_t hash_code() const throw() { return hash; }
+        
+        /// Invoke this callback with required arguments.
+        callback<A...>& invoke(A... args) { bound(args...); return (*this); }
     };
 
     template<typename... A>
