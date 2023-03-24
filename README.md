@@ -70,3 +70,8 @@ Finally the function calls can be method-chained, example:
 ```
 event.hook(static_call).hook(lambda_call);
 ```
+Each callback also has a semi-unique hash code. The hash code is not unique to the callback itself, but unique to the underlying function or member-function bound to the callback. This keeps you from generating duplicate bindings for the same callback function to `invokable<A...>`. You can still create duplicate `callbacks<A...>` with the same function or member-function, but they cannot all be bound to `invokable<A...>`.
+```
+callback<> static_call(&myclass::function);
+size_t hash = static_call.hash_code();
+```
