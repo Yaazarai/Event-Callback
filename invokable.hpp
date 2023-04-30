@@ -7,6 +7,7 @@
     #include <vector>
     #include <mutex>
     #include <utility>
+    #include <type_traits>
 
     template<typename... A>
     class callback {
@@ -23,19 +24,28 @@
             bound = [func = std::move(func)](A... args) { std::invoke(func, args...); };
             hash = bound.target_type().hash_code();
         }
-        
+
         /// Binds the a class function attached to an instance of that class.
         template<typename T, class Fx>
         void bind_callback(T* obj, Fx func) {
             bound = [obj, func = std::move(func)](A... args) { std::invoke(func, obj, args...); };
             hash = std::hash<T*>{}(obj) ^ bound.target_type().hash_code();
         }
-        
+
         /// Create a callback to a static or lambda function.
-        template<typename T, class Fx> callback(T* obj, Fx func) { bind_callback(obj, func); }
-        
+        template<typename T>
+        callback(T* obj, std::type_identity_t<void (T::*)(A...)> func) { bind_callback(obj, func); }
+
+        /// Create a callback to a static or lambda function.
+        template<typename T>
+        callback(std::type_identity_t<void (T::*)(A...)> func) { bind_callback(func); }
+
         /// Create a callback to a class function attached to an instance of that class.
-        template<class Fx> callback(Fx func) { bind_callback(func); }
+        callback(std::type_identity_t<void(A...)> func) { bind_callback(func); }
+
+        /// Create a callback to a class function attached to an instance of that class.
+        template<typename Lx = []void(A...)->void>
+        callback(Lx func) { bind_callback(func); }
         
         /// Compares the underlying hash_code of the callback function(s).
         bool operator == (const callback<A...>& cb) { return hash == cb.hash; }
@@ -48,6 +58,9 @@
         
         /// Invoke this callback with required arguments.
         callback<A...>& invoke(A... args) { bound(args...); return (*this); }
+
+        /// Operator() invoke this callback with required arguments.
+        void operator()(A... args) { bound(args...); }
     };
 
     template<typename... A>
