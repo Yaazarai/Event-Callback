@@ -18,35 +18,11 @@
         std::function<void(A...)> bound;
 
     public:
-        /// Binds a static or lambda function.
-        template<class Fx>
-        void bind_callback(Fx func) {
+        callback(std::function<void(A...)> func) {
             bound = [func = std::move(func)](A... args) { std::invoke(func, args...); };
             hash = bound.target_type().hash_code();
         }
 
-        /// Binds the a class function attached to an instance of that class.
-        template<typename T, class Fx>
-        void bind_callback(T* obj, Fx func) {
-            bound = [obj, func = std::move(func)](A... args) { std::invoke(func, obj, args...); };
-            hash = std::hash<T*>{}(obj) ^ bound.target_type().hash_code();
-        }
-
-        /// Create a callback to a static or lambda function.
-        template<typename T>
-        callback(T* obj, std::type_identity_t<void (T::*)(A...)> func) { bind_callback(obj, func); }
-
-        /// Create a callback to a static or lambda function.
-        template<typename T>
-        callback(std::type_identity_t<void (T::*)(A...)> func) { bind_callback(func); }
-
-        /// Create a callback to a class function attached to an instance of that class.
-        template<typename Lx = []void(A...)->void>
-        callback(Lx func) { bind_callback(func); }
-
-        /// Create a callback to a class function attached to an instance of that class.
-        callback(std::type_identity_t<void(A...)> func) { bind_callback(func); }
-        
         /// Compares the underlying hash_code of the callback function(s).
         bool operator == (const callback<A...>& cb) { return hash == cb.hash; }
         
