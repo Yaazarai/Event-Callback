@@ -15,15 +15,22 @@ invokable<> event;
 ```
 Callback creation:
 
-- ***Quick Clarification: The template arguments are the function parameters of the function you want to create a callback for. The actual arguments to the callback constructor are the references to the function and instance the function is attached to itself. This could be somewhat confusing if you usually correlate template parameters with the leading constructor parameters for other projects.***
+- ***Quick Clarification: The template arguments are the function parameters of the function you want to create a callback for. While the constructor accepts `std::function` using those parameters.***
+
+Example usage of callbakc creation using lambdas:
 ```C++
 class myclass {
 public:
     void F(int x, int y) {...};
+    static inline void FF(int x, int y) {...};
 };
 
-myclass inst;
-callback<int, int> call(&inst, &myclass::F);
+class inst;
+auto lambda1 = [&inst](int x, int y) { inst.F(x, y); };
+callback<int, int> call1(lambda1);
+
+auto lambda2 = [](int x, int y) { myclass::FF(x, y); };
+callback<int, int> call2(lambda2);
 ```
 Hooking and unhooking a callback to/from an event:
 ```C++
@@ -46,25 +53,9 @@ Unhooking all hooked events:
 ```C++
 event.empty();
 ```
-
 Invoking an event--notifies subscribed callbacks:
 ```C++
 event.invoke(10, 10);
-```
-Lambda & Static Class Methods:
-```C++
-class myclass {
-public:
-    static void function() {
-       cout << "Static Call" << endl;
-    }
-};
-
-invokable<> event;
-callback<> static_call(&myclass::function);
-callback<> lambda_call([](){cout << "Lambda Call" << endl;});
-event.hook(static_call);
-event.hook(lambda_call);
 ```
 Finally the function calls can be method-chained, example:
 ```
