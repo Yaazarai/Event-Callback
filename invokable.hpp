@@ -41,11 +41,11 @@
         callback(std::type_identity_t<void (T::*)(A...)> func) { bind_callback(func); }
 
         /// Create a callback to a class function attached to an instance of that class.
-        callback(std::type_identity_t<void(A...)> func) { bind_callback(func); }
-
-        /// Create a callback to a class function attached to an instance of that class.
         template<typename Lx = []void(A...)->void>
         callback(Lx func) { bind_callback(func); }
+
+        /// Create a callback to a class function attached to an instance of that class.
+        callback(std::type_identity_t<void(A...)> func) { bind_callback(func); }
         
         /// Compares the underlying hash_code of the callback function(s).
         bool operator == (const callback<A...>& cb) { return hash == cb.hash; }
