@@ -18,10 +18,8 @@
         std::function<void(A...)> bound;
 
     public:
-        callback(std::function<void(A...)> func) {
-            bound = [func = std::move(func)](A... args) { std::invoke(func, args...); };
-            hash = bound.target_type().hash_code();
-        }
+        // Creates a callback to a function with the associated templated arguments.
+        callback(std::function<void(A...)> func) : hash(func.target_type().hash_code()), bound(std::move(func)) {}
 
         /// Compares the underlying hash_code of the callback function(s).
         bool operator == (const callback<A...>& cb) { return hash == cb.hash; }
@@ -33,10 +31,10 @@
         constexpr size_t hash_code() const throw() { return hash; }
         
         /// Invoke this callback with required arguments.
-        callback<A...>& invoke(A... args) { bound(args...); return (*this); }
+        callback<A...>& invoke(A... args) { bound(static_cast<A&&>(args)...); return (*this); }
 
         /// Operator() invoke this callback with required arguments.
-        void operator()(A... args) { bound(args...); }
+        void operator()(A... args) { bound(static_cast<A&&>(args)...); }
     };
 
     template<typename... A>
@@ -78,10 +76,19 @@
             return (*this);
         }
 
-        /// Execute all registered callbacks, operator ()
+        /// Execute all registered callbacks, operator () and is non-blocking by copying callback resource list.
         invokable<A...>& invoke(A... args) {
+            safety_lock.lock();
+            std::vector<callback<A...>> clonecb(callbacks);
+            safety_lock.unlock();
+            for (callback<A...> cb : clonecb) cb.invoke(static_cast<A&&>(args)...);
+            return (*this);
+        }
+        
+        /// Execute all registered callbacks, operator () and blocks thread by locking callback resource list.
+        invokable<A...>& invoke_blocking(A... args) {
             std::lock_guard<std::mutex> g(safety_lock);
-            for(callback<A...> cb : callbacks) cb.invoke(args...);
+            for (callback<A...> cb : callbacks) cb.invoke(static_cast<A&&>(args)...);
             return (*this);
         }
     };
