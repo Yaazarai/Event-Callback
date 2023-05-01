@@ -49,8 +49,7 @@
         /// Adds a callback to this event, operator +=
         invokable<A...>& hook(const callback<A...> cb) {
             std::lock_guard<std::mutex> g(safety_lock);
-            if (std::find(callbacks.begin(), callbacks.end(), cb) == callbacks.end())
-                callbacks.push_back(cb);
+            callbacks.push_back(cb);
             return (*this);
         }
 
