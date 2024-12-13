@@ -17,7 +17,7 @@ Callback creation:
 
 - ***Quick Clarification: The template arguments are the function parameters of the function you want to create a callback for. While the constructor accepts `std::function` using those parameters.***
 
-Example usage of callbakc creation using lambdas:
+Example usage of callback creation using lambdas:
 ```C++
 class myclass {
 public:
